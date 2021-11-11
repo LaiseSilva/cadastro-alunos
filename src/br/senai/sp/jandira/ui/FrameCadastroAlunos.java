@@ -15,15 +15,21 @@ import java.awt.event.ActionEvent;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+
+import br.senai.sp.jandira.model.Aluno;
 import br.senai.sp.jandira.model.Periodo;
+import br.senai.sp.jandira.repository.AlunoRepository;
 
 public class FrameCadastroAlunos extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField textMatricula;
-	private JTextField textNome;
+	private JTextField txtMatricula;
+	private JTextField txtNome;
+	private int posicao = 0;
 
 	public FrameCadastroAlunos() {
+
 		setTitle("Cadastro de Alunos");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -33,38 +39,44 @@ public class FrameCadastroAlunos extends JFrame {
 		contentPane.setLayout(null);
 
 		JLabel lblMatricula = new JLabel("Matr\u00EDcula:");
-		lblMatricula.setBounds(10, 27, 76, 14);
+		lblMatricula.setBounds(10, 40, 56, 14);
 		contentPane.add(lblMatricula);
 
-		textMatricula = new JTextField();
-		textMatricula.setBounds(96, 23, 86, 22);
-		contentPane.add(textMatricula);
-		textMatricula.setColumns(10);
+		txtMatricula = new JTextField();
+		txtMatricula.setBounds(78, 37, 169, 20);
+		contentPane.add(txtMatricula);
+		txtMatricula.setColumns(10);
 
 		JLabel lblNome = new JLabel("Nome:");
 		lblNome.setBounds(10, 71, 38, 14);
 		contentPane.add(lblNome);
 
-		textNome = new JTextField();
-		textNome.setColumns(10);
-		textNome.setBounds(66, 68, 169, 20);
-		contentPane.add(textNome);
+		txtNome = new JTextField();
+		txtNome.setColumns(10);
+		txtNome.setBounds(78, 68, 169, 20);
+		contentPane.add(txtNome);
 
 		JLabel lblPeriodo = new JLabel("Per\u00EDodo");
-		lblPeriodo.setBounds(10, 113, 56, 14);
+		lblPeriodo.setBounds(10, 103, 56, 14);
 		contentPane.add(lblPeriodo);
 
 		JComboBox comboPeriodo = new JComboBox();
-		comboPeriodo.setModel(new DefaultComboBoxModel(Periodo.values()));
-		comboPeriodo.setBounds(94, 109, 141, 22);
+
+		DefaultComboBoxModel<String> modelPeriodo = new DefaultComboBoxModel<String>();
+
+		// tipo da variavel deve ser o mesmo que vou extrair, a cada volta é extraido o
+		// valor(nesse caso são os valores do período) e guardado em p, : é apenas o separador
+		
+		for (Periodo p : Periodo.values()) {
+			modelPeriodo.addElement(p.getDescricao());
+		}
+
+		comboPeriodo.setModel(modelPeriodo);
+		comboPeriodo.setBounds(78, 99, 169, 22);
 		contentPane.add(comboPeriodo);
 
 		JButton btnSalvarAluno = new JButton("Salvar aluno");
-		btnSalvarAluno.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		btnSalvarAluno.setBounds(66, 154, 143, 38);
+		btnSalvarAluno.setBounds(91, 179, 143, 38);
 		contentPane.add(btnSalvarAluno);
 
 		JLabel lblListaDeAlunos = new JLabel("Lista de Alunos:");
@@ -76,6 +88,48 @@ public class FrameCadastroAlunos extends JFrame {
 		contentPane.add(scrollPane);
 
 		JList listAlunos = new JList();
-		 scrollPane.setViewportView(listAlunos);
+		DefaultListModel<String> listaModel = new DefaultListModel<String>();
+		listAlunos.setModel(listaModel);
+		scrollPane.setViewportView(listAlunos);
+		
+		JButton btnMostrarAlunos = new JButton("Exibir alunos");
+		btnMostrarAlunos.setBounds(91, 228, 143, 14);
+		contentPane.add(btnMostrarAlunos);
+		
+		AlunoRepository turma = new AlunoRepository(3);
+		
+		
+		btnSalvarAluno.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				Aluno aluno = new Aluno();
+				aluno.setMatricula(txtMatricula.getText());
+				aluno.setNome(txtNome.getText());
+				
+				turma.gravar(aluno, posicao);
+				
+				posicao++;
+				
+				//Adicionar o nome do aluno ao model da lista
+				
+				listaModel.addElement(aluno.getNome());
+			}
+		});
+		
+		btnMostrarAlunos.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				for (Aluno aluno : turma.listarTodos()) {
+					System.out.println(aluno.getMatricula());
+					System.out.println(aluno.getNome());
+					System.out.println("-----------------------");
+				}
+				
+			}
+		});
 	}
 }

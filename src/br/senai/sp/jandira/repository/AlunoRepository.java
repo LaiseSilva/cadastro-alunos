@@ -2,9 +2,11 @@ package br.senai.sp.jandira.repository;
 
 import br.senai.sp.jandira.model.Aluno;
 
+//guardo e busco os objetos
+
 public class AlunoRepository {
 	
-	private Aluno[] turma;
+	private Aluno[] turma; 
 	
 	public AlunoRepository() {
 		turma = new Aluno[32];   

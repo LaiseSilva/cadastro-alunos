@@ -6,6 +6,7 @@ public enum Periodo {
 
 	private String descricao;
 
+	//construtor em Enum deve ser privado, por ser lista que não pode ser modificada 
 	private Periodo(String descricao) {
 		this.descricao = descricao;
 	}
