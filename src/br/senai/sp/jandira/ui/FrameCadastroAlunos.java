@@ -6,14 +6,21 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 
@@ -65,8 +72,9 @@ public class FrameCadastroAlunos extends JFrame {
 		DefaultComboBoxModel<String> modelPeriodo = new DefaultComboBoxModel<String>();
 
 		// tipo da variavel deve ser o mesmo que vou extrair, a cada volta é extraido o
-		// valor(nesse caso são os valores do período) e guardado em p, : é apenas o separador
-		
+		// valor(nesse caso são os valores do período) e guardado em p, : é apenas o
+		// separador
+
 		for (Periodo p : Periodo.values()) {
 			modelPeriodo.addElement(p.getDescricao());
 		}
@@ -91,45 +99,86 @@ public class FrameCadastroAlunos extends JFrame {
 		DefaultListModel<String> listaModel = new DefaultListModel<String>();
 		listAlunos.setModel(listaModel);
 		scrollPane.setViewportView(listAlunos);
-		
+
 		JButton btnMostrarAlunos = new JButton("Exibir alunos");
 		btnMostrarAlunos.setBounds(91, 228, 143, 14);
 		contentPane.add(btnMostrarAlunos);
-		
+
 		AlunoRepository turma = new AlunoRepository(3);
-		
-		
+
 		btnSalvarAluno.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+
 				Aluno aluno = new Aluno();
 				aluno.setMatricula(txtMatricula.getText());
 				aluno.setNome(txtNome.getText());
-				
+
+				// System.out.println(comboPeriodo.getSelectedIndex()); // retorna o indice
+				// System.out.println(comboPeriodo.getSelectedItem()); // retorna o texto
+
+				// Definir o horário que o aluno estuda
+				aluno.setPeriodo(determinarPeriodo(comboPeriodo.getSelectedIndex()));
+
+				// aluno.setPeriodo(Periodo);
 				turma.gravar(aluno, posicao);
-				
+
 				posicao++;
-				
-				//Adicionar o nome do aluno ao model da lista
-				
+
+				// Adicionar o nome do aluno ao model da lista
 				listaModel.addElement(aluno.getNome());
+
+				if (posicao == turma.getTamanho()) {
+					btnSalvarAluno.setEnabled(false);
+					JOptionPane.showMessageDialog(null, "A turma já encheu", "Cheio!", JOptionPane.WARNING_MESSAGE); // mostrar
+																														// mensagens
+																														// para
+																														// o
+																														// usuário
+				}
 			}
 		});
-		
+
 		btnMostrarAlunos.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+
 				for (Aluno aluno : turma.listarTodos()) {
 					System.out.println(aluno.getMatricula());
 					System.out.println(aluno.getNome());
+					System.out.println(aluno.getPeriodo().getDescricao());
 					System.out.println("-----------------------");
 				}
-				
+
 			}
 		});
+
+		listAlunos.addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				Aluno aluno = turma.listarAluno(listAlunos.getSelectedIndex());
+				txtMatricula.setText(aluno.getMatricula());
+				txtNome.setText(aluno.getNome());
+				
+				comboPeriodo.setSelectedIndex(aluno.getPeriodo().ordinal());
+
+			}
+		});
+	}
+
+	private Periodo determinarPeriodo(int periodoSelecionado) {
+
+		if (periodoSelecionado == 0) {
+			return Periodo.MANHA;
+		} else if (periodoSelecionado == 1) {
+			return Periodo.TARDE;
+		} else if (periodoSelecionado == 2) {
+			return Periodo.NOITE;
+		} else {
+			return Periodo.SABADO;
+		}
 	}
 }
